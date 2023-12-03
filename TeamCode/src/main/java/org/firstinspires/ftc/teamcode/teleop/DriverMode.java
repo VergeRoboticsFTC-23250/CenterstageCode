@@ -1,32 +1,35 @@
 package org.firstinspires.ftc.teamcode.teleop;
-
-import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
+import static org.firstinspires.ftc.teamcode.util.Gamepads.Button.*;
+import org.firstinspires.ftc.teamcode.util.Gamepads;
+import org.firstinspires.ftc.teamcode.util.Robot;
 
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import java.util.HashMap;
 
 @TeleOp
 public class DriverMode extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-
-        drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Robot.init(hardwareMap);
+        Gamepads.update(gamepad1, gamepad2);
+        telemetry.addData("Button", "GP1 Circle open");
+        telemetry.update();
 
         waitForStart();
 
         while (!isStopRequested()) {
-            drive.setWeightedDrivePower(
-                    new Pose2d(
-                            -gamepad1.left_stick_y,
-                            -gamepad1.left_stick_x,
-                            -gamepad1.right_stick_x
-                    )
-            );
+            Robot.Chassis.run(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
+            Robot.Slides.run(-gamepad2.right_stick_y);
 
-            drive.update();
+            if(Gamepads.onRelease(CIRCLE1, gamepad1.circle)){
+                Robot.Intake.toggle();
+            }
+
+            Gamepads.update(gamepad1, gamepad2);
+            telemetry.addData("Slide Posiiton", Robot.Slides.getPos());
+            telemetry.addData("Slides Power", -gamepad2.right_stick_y);
+            telemetry.update();
         }
     }
 }
