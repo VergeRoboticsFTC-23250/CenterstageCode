@@ -112,7 +112,7 @@ public class Robot {
 
     @Config
     public static class Hook{
-        public static int maxPos = 1000;
+        public static int maxPos = 3000;
         private static DcMotor hookMotor;
 
         private static boolean isExtended = false;
@@ -126,7 +126,7 @@ public class Robot {
         public static void toggle(int pow){
             hookMotor.setPower(0);
             isExtended = !isExtended;
-            hookMotor.setTargetPosition(isExtended? maxPos : 0);
+            hookMotor.setTargetPosition(isExtended? maxPos : 1000);
             hookMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             hookMotor.setPower(pow);
         }
@@ -188,4 +188,6 @@ public class Robot {
             ramp.setPosition(pos);
         }
     }
+
+
 }

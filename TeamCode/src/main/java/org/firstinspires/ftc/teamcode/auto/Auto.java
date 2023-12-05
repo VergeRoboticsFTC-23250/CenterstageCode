@@ -1,25 +1,17 @@
 package org.firstinspires.ftc.teamcode.auto;
 
-import com.acmerobotics.roadrunner.path.Path;
-import com.acmerobotics.roadrunner.path.PathSegment;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.util.Robot;
-import org.opencv.core.Mat;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvPipeline;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-@com.qualcomm.robotcore.eventloop.opmode.Autonomous
-public class Autonomous extends LinearOpMode {
+@Autonomous
+public class Auto extends LinearOpMode {
     OpenCvWebcam webcam = null;
     CenterstagePipeline.CenterstagePosition resultingPosition = CenterstagePipeline.CenterstagePosition.LEFT;
 

@@ -22,8 +22,12 @@ public class DriverMode extends LinearOpMode {
             Robot.Chassis.run(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
             Robot.Slides.run(-gamepad2.right_stick_y);
 
-            if(Gamepads.onRelease(CIRCLE1, gamepad1.circle)){
+            if(Gamepads.onRelease(CIRCLE2, gamepad2.circle)){
                 Robot.Intake.toggle();
+            }
+
+            if(Gamepads.onRelease(SQUARE2, gamepad2.square)){
+                Robot.Hook.toggle(1);
             }
 
             Gamepads.update(gamepad1, gamepad2);
