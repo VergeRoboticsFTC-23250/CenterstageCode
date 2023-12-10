@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.auto;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -10,12 +13,16 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
+import static org.firstinspires.ftc.teamcode.auto.CenterstagePipeline.CenterstagePosition.LEFT;
+import static org.firstinspires.ftc.teamcode.auto.CenterstagePipeline.CenterstagePosition.RIGHT;
+import static org.firstinspires.ftc.teamcode.util.Robot.Chassis.drive;
+
 @Autonomous
 public class Auto extends LinearOpMode {
     OpenCvWebcam webcam = null;
-    CenterstagePipeline.CenterstagePosition resultingPosition = CenterstagePipeline.CenterstagePosition.LEFT;
+    CenterstagePipeline.CenterstagePosition resultingPosition = LEFT;
 
-    public void runOpMode(){
+    public void runOpMode() throws InterruptedException {
         WebcamName webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
@@ -47,27 +54,34 @@ public class Auto extends LinearOpMode {
 
         resultingPosition = pipeline.getLastResult();
 
-        telemetry.addLine("Recognized " + resultingPosition);
-
-        switch (resultingPosition)
-        {
-            case LEFT:
-            {
-                Robot.Slides.run(0, 1);
-                break;
-            }
-
-            case RIGHT:
-            {
-                Robot.Slides.run(100, 1);
-                break;
-            }
-
-            case CENTER:
-            {
-                Robot.Slides.run(200, 1);
-                break;
-            }
+        if(resultingPosition != LEFT){
+            drive.followTrajectory(drive.trajectoryBuilder(new Pose2d())
+                    .strafeRight(10)
+                    .build()
+            );
+        }else{
+            drive.followTrajectory(drive.trajectoryBuilder(new Pose2d())
+                    .strafeRight(6)
+                    .build()
+            );
+            drive.followTrajectory(drive.trajectoryBuilder(new Pose2d())
+                    .forward(24)
+                    .build()
+            );
+            drive.turn(Math.toRadians(90));
         }
+
+        Thread.sleep(1000);
+
+        resultingPosition = pipeline.getLastResult();
+
+        if(resultingPosition == RIGHT){
+            //RIGHT
+        }else{
+            //CENTER
+        }
+
+        telemetry.addData("Realtime analysis", resultingPosition);
+        telemetry.update();
     }
 }

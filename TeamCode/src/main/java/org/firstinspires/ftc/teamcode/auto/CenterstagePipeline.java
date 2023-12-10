@@ -17,7 +17,7 @@ class CenterstagePipeline extends OpenCvPipeline {
 
     Mat leftCrop, centerCrop, rightCrop;
 
-    int avgLeft, avgCenter, avgRight;
+    double avgLeft, avgCenter, avgRight;
 
     public enum CenterstagePosition
     {
@@ -41,15 +41,15 @@ class CenterstagePipeline extends OpenCvPipeline {
         centerCrop = YCrCb.submat(centerRect);
         rightCrop = YCrCb.submat(rightRect);
 
-        Core.extractChannel(leftCrop, leftCrop, 2);
-        Core.extractChannel(centerCrop, centerCrop, 2);
-        Core.extractChannel(rightCrop, rightCrop, 2);
+        Core.extractChannel(leftCrop, leftCrop, 1);
+        Core.extractChannel(centerCrop, centerCrop, 1);
+        Core.extractChannel(rightCrop, rightCrop, 1);
 
-        avgLeft = (int) Core.mean(leftCrop).val[0];
-        avgCenter = (int) Core.mean(centerCrop).val[0];
-        avgRight = (int) Core.mean(rightCrop).val[0];
+        avgLeft = Core.mean(leftCrop).val[0];
+        avgCenter = Core.mean(centerCrop).val[0];
+        avgRight = Core.mean(rightCrop).val[0];
 
-        int max = Math.max(avgLeft, Math.max(avgCenter, avgRight));
+        double max = Math.max(avgLeft, Math.max(avgCenter, avgRight));
 
         input.copyTo(output);
         Imgproc.rectangle(output, leftRect, rectColor, 2);
