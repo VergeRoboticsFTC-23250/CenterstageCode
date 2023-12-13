@@ -1,42 +1,60 @@
 package org.firstinspires.ftc.teamcode.auto;
-
-import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.util.Robot;
+import org.firstinspires.ftc.teamcode.auto.Pipelines.LeftWebcamPipeline;
+import org.firstinspires.ftc.teamcode.auto.Pipelines.RightWebcamPipeline;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-import static org.firstinspires.ftc.teamcode.auto.CenterstagePipeline.CenterstagePosition.LEFT;
-import static org.firstinspires.ftc.teamcode.auto.CenterstagePipeline.CenterstagePosition.RIGHT;
-import static org.firstinspires.ftc.teamcode.util.Robot.Chassis.drive;
-
 @Autonomous
 public class Auto extends LinearOpMode {
-    OpenCvWebcam webcam = null;
-    CenterstagePipeline.CenterstagePosition resultingPosition = LEFT;
+    OpenCvWebcam leftWebcam;
+    OpenCvWebcam rightWebcam;
+    LeftWebcamPipeline leftWebcamPipeline;
+    RightWebcamPipeline rightWebcamPipeline;
 
+    LeftWebcamPipeline.LeftWebcamPosition leftWebcamPosition = LeftWebcamPipeline.LeftWebcamPosition.LEFT;
+    RightWebcamPipeline.RightWebcamPosition rightWebcamPosition = RightWebcamPipeline.RightWebcamPosition.RIGHT;
+    double rightWebcamDifferance = 0;
+    double leftWebcamDifferance = 0;
     public void runOpMode() throws InterruptedException {
-        WebcamName webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        CenterstagePipeline pipeline = new CenterstagePipeline();
-        webcam.setPipeline(pipeline);
 
-        Robot.init(hardwareMap);
+        int[] viewportContainerIds = OpenCvCameraFactory.getInstance().splitLayoutForMultipleViewports(cameraMonitorViewId, 2, OpenCvCameraFactory.ViewportSplitMethod.VERTICALLY);
 
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        leftWebcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), viewportContainerIds[0]);
+        rightWebcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 2"), viewportContainerIds[1]);
+
+        leftWebcamPipeline = new LeftWebcamPipeline();
+        rightWebcamPipeline = new RightWebcamPipeline();
+
+        leftWebcam.setPipeline(leftWebcamPipeline);
+        rightWebcam.setPipeline(rightWebcamPipeline);
+
+        leftWebcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
             @Override
             public void onOpened()
             {
-                webcam.startStreaming(1280,960, OpenCvCameraRotation.UPRIGHT);
+                leftWebcam.setPipeline(leftWebcamPipeline);
+                leftWebcam.startStreaming(1280,960, OpenCvCameraRotation.UPRIGHT);
+            }
+
+            @Override
+            public void onError(int errorCode) {}
+        });
+
+        rightWebcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened()
+            {
+                rightWebcam.setPipeline(rightWebcamPipeline);
+                rightWebcam.startStreaming(1280,960, OpenCvCameraRotation.UPRIGHT);
             }
 
             @Override
@@ -45,43 +63,43 @@ public class Auto extends LinearOpMode {
 
         while (!isStarted() && !isStopRequested())
         {
-            telemetry.addData("Realtime analysis", pipeline.getLastResult());
+            telemetry.addData("Right Cam", rightWebcamPipeline.getLastResult());
+            telemetry.addData("Left Cam", leftWebcamPipeline.getLastResult());
+
+            rightWebcamPosition = rightWebcamPipeline.getLastResult();
+            leftWebcamPosition = leftWebcamPipeline.getLastResult();
+
+            telemetry.addData("Right Cam", rightWebcamPipeline.getRightCamDifferance());
+            telemetry.addData("Left Cam", leftWebcamPipeline.getLeftCamDifferance());
+
+            rightWebcamDifferance = rightWebcamPipeline.getRightCamDifferance();
+            leftWebcamDifferance = leftWebcamPipeline.getLeftCamDifferance();
+
+            if(rightWebcamPosition == RightWebcamPipeline.RightWebcamPosition.CENTER && leftWebcamPosition == LeftWebcamPipeline.LeftWebcamPosition.CENTER){
+                telemetry.addData("Position", "CENTER");
+            }else if(rightWebcamPosition == RightWebcamPipeline.RightWebcamPosition.RIGHT && rightWebcamDifferance > leftWebcamDifferance){
+                telemetry.addData("Position", "RIGHT");
+            }else if(leftWebcamPosition == LeftWebcamPipeline.LeftWebcamPosition.LEFT && leftWebcamDifferance > rightWebcamDifferance){
+                telemetry.addData("Position", "LEFT");
+            }else{
+                telemetry.addData("Position", "UNKNOWN");
+            }
+
             telemetry.update();
 
             // Don't burn CPU cycles busy-looping in this sample
             sleep(50);
         }
 
-        resultingPosition = pipeline.getLastResult();
+        waitForStart();
 
-        if(resultingPosition != LEFT){
-            drive.followTrajectory(drive.trajectoryBuilder(new Pose2d())
-                    .strafeRight(10)
-                    .build()
-            );
-        }else{
-            drive.followTrajectory(drive.trajectoryBuilder(new Pose2d())
-                    .strafeRight(6)
-                    .build()
-            );
-            drive.followTrajectory(drive.trajectoryBuilder(new Pose2d())
-                    .forward(24)
-                    .build()
-            );
-            drive.turn(Math.toRadians(90));
+        while (opModeIsActive())
+        {
+            telemetry.addData("Left cam FPS", leftWebcam.getFps());
+            telemetry.addData("Right cam FPS", rightWebcam.getFps());
+            telemetry.update();
+
+            sleep(100);
         }
-
-        Thread.sleep(1000);
-
-        resultingPosition = pipeline.getLastResult();
-
-        if(resultingPosition == RIGHT){
-            //RIGHT
-        }else{
-            //CENTER
-        }
-
-        telemetry.addData("Realtime analysis", resultingPosition);
-        telemetry.update();
     }
 }

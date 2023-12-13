@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.auto;
+package org.firstinspires.ftc.teamcode.auto.Disabled;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;

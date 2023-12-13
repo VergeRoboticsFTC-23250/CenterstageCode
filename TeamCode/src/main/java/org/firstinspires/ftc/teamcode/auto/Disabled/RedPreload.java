@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.auto;
+package org.firstinspires.ftc.teamcode.auto.Disabled;
 
 import static org.firstinspires.ftc.teamcode.util.Robot.Chassis.drive;
 
@@ -10,14 +10,14 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.util.Robot;
 
 @Autonomous
-public class BluePreload extends LinearOpMode {
+public class RedPreload extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         Robot.init(hardwareMap);
         waitForStart();
         Robot.Outtake.openBlocker();
         Robot.Outtake.closeGrip();
         Trajectory traj1 = drive.trajectoryBuilder(new Pose2d())
-                .strafeRight(26)
+                .strafeLeft(26)
                 .build();
         drive.followTrajectory(traj1);
 
@@ -37,7 +37,7 @@ public class BluePreload extends LinearOpMode {
         Robot.Slides.run(0, 1);
 
         Trajectory traj3 = drive.trajectoryBuilder(traj2.end())
-                .strafeLeft(23)
+                .strafeRight(23)
                 .build();
         drive.followTrajectory(traj3);
 

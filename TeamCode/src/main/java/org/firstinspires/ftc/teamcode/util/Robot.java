@@ -11,7 +11,10 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.checkerframework.checker.units.qual.C;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+
+import java.io.Serializable;
 
 @Config
 public class Robot {
@@ -30,6 +33,7 @@ public class Robot {
         Outtake.init(hardwareMap);
         BreakBeam.init(hardwareMap);
         Airplane.init(hardwareMap);
+        AutoPeg.init(hardwareMap);
     }
 
     public static class Chassis{
@@ -159,6 +163,7 @@ public class Robot {
             hookMotor.setTargetPosition(isExtended? maxPos : 1000);
             hookMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             hookMotor.setPower(pow);
+            while (hookMotor.isBusy()){}
         }
     }
 
@@ -287,58 +292,26 @@ public class Robot {
         }
     }
 
-    public static class AutoPeg{
-
-    }
-
     @Config
-    public static class Macros{
-        public static int PAUSE_TIME = 1000;
-        public static double POWER = 0.5;
-
-        public static int MIN_BUCKET_PIVOT_POS = 1300;
-
-        private static void SafeSetPivotState(Outtake.PivotState pivotState) throws InterruptedException {
-            if(Outtake.getPivotState() != pivotState){
-                Outtake.openBlocker();
-                Thread.sleep(PAUSE_TIME);
-
-                if((Outtake.getPivotState() == DOWN || pivotState == DOWN) && Slides.getPos() < MIN_BUCKET_PIVOT_POS){
-                    Slides.run(MIN_BUCKET_PIVOT_POS, POWER);
-                    Thread.sleep(PAUSE_TIME);
-                    Outtake.setPivotState(pivotState);
-                    Thread.sleep(PAUSE_TIME);
-                    Slides.run(1, POWER);
-                }else{
-                    Outtake.setPivotState(pivotState);
-                }
-            }
-        }
-        public static void Intake(){
-            try{
-                SafeSetPivotState(DOWN);
-                Thread.sleep(PAUSE_TIME);
-                Outtake.closeBlocker();
-                if(!Intake.isActive){Intake.toggle();}
-                robotState = INTAKE;
-            }catch (Exception ignored){}
+    public static class AutoPeg{
+        private static Servo autoPeg;
+        public static double RESTING_POS = 0;
+        public static double STARTING_POS = 0.2;
+        public static double SCORING_POS = 0.8;
+        public static void init(HardwareMap hardwareMap){
+            autoPeg = hardwareMap.get(Servo.class, "autoPeg");
         }
 
-        public static void Scoring(){
-            try{
-                if(Intake.isActive){Intake.toggle();}
-                SafeSetPivotState(REST);
-                Outtake.setPivotState(REST);
-                robotState = SCORING;
-            }catch (Exception ignored){}
+        public static void setResting() {
+            autoPeg.setPosition(RESTING_POS);
         }
 
-        public static void Test(){
-            try {
-                Slides.run(MIN_BUCKET_PIVOT_POS, POWER);
-                Outtake.openBlocker();
-                Thread.sleep(1000);
-            }catch (Exception ignored){}
+        public static void setStarting() {
+            autoPeg.setPosition(STARTING_POS);
+        }
+
+        public static void setScoring() {
+            autoPeg.setPosition(SCORING_POS);
         }
     }
 }
