@@ -23,6 +23,12 @@ public class Robot {
         OUTTAKE
     }
 
+    public enum PropPosition{
+        LEFT,
+        CENTER,
+        RIGHT
+    }
+
     public static RobotState robotState = RobotState.INTAKE;
 
     public static void init(HardwareMap hardwareMap){
@@ -329,8 +335,8 @@ public class Robot {
     @Config
     public static class Airplane{
         public static Servo airplane;
-        public static double HOLD = 1;
-        public static double LAUNCH = 0.75;
+        public static double HOLD = 0.75;
+        public static double LAUNCH = 1;
         public static void init(HardwareMap hardwareMap){
             airplane = hardwareMap.get(Servo.class, "airplane");
             airplane.setPosition(HOLD);

@@ -10,7 +10,7 @@ import static org.firstinspires.ftc.teamcode.util.Robot.*;
 public class DriverMode extends LinearOpMode {
     DriveThread driveThread = new DriveThread();
     TelemetryThread telemetryThread = new TelemetryThread();
-    ClawThread clawThread = new ClawThread();
+    LimitSwitchThread limitSwitchThread = new LimitSwitchThread();
     @Override
     public void runOpMode() throws InterruptedException {
         Robot.init(hardwareMap);
@@ -21,18 +21,55 @@ public class DriverMode extends LinearOpMode {
 
         driveThread.start();
         telemetryThread.start();
-        clawThread.start();
+        limitSwitchThread.start();
 
         while (!isStopRequested()) {
-            if(gamepad2.cross && !gamepad2.square){
-                if(robotState != RobotState.INTAKE){
-                    RestToIntake();
-                }
-            }else if(gamepad2.square && !gamepad2.cross){
-                if(robotState != RobotState.OUTTAKE){
-                    RestToOuttake();
-                }
+//            if(gamepad2.cross && !gamepad2.square){
+//                if(robotState != RobotState.INTAKE){
+//                    RestToIntake();
+//                }
+//            }else if(gamepad2.square && !gamepad2.cross){
+//                if(robotState != RobotState.OUTTAKE){
+//                    RestToOuttake();
+//                }
+//
+//                if(gamepad2.right_trigger > 0 && gamepad2.left_trigger > 0){
+//                    Slides.run(0);
+//                }else if(gamepad2.right_trigger > 0){
+//                    Slides.run(gamepad2.right_trigger);
+//                }else if(gamepad2.left_trigger > 0){
+//                    Slides.run(-gamepad2.left_trigger);
+//                }else{
+//                    Slides.run(0);
+//                }
+//
+//            }else{
+//                if(robotState == RobotState.INTAKE){
+//                    IntakeToRest();
+//                }else if(robotState == RobotState.OUTTAKE){
+//                    OuttakeToRest();
+//                }
+//            }
 
+            if(!gamepad2.cross && robotState != RobotState.INTAKE && gamepad2.square){
+                if(robotState == RobotState.OUTTAKE){
+                    OuttakeToRest();
+                    while (gamepad2.square){}
+                }else{
+                    RestToOuttake();
+                    while (gamepad2.square){}
+                }
+            }else {
+                if(robotState != RobotState.OUTTAKE){
+                    if(gamepad2.cross && robotState != RobotState.INTAKE){
+                        RestToIntake();
+                    }else if(!gamepad2.cross && robotState == RobotState.INTAKE) {
+                        IntakeToRest();
+                    }
+                }
+            }
+
+            if(robotState == RobotState.OUTTAKE && !gamepad2.square && !gamepad2.cross){
                 if(gamepad2.right_trigger > 0 && gamepad2.left_trigger > 0){
                     Slides.run(0);
                 }else if(gamepad2.right_trigger > 0){
@@ -41,13 +78,6 @@ public class DriverMode extends LinearOpMode {
                     Slides.run(-gamepad2.left_trigger);
                 }else{
                     Slides.run(0);
-                }
-
-            }else{
-                if(robotState == RobotState.INTAKE){
-                    IntakeToRest();
-                }else if(robotState == RobotState.OUTTAKE){
-                    OuttakeToRest();
                 }
             }
 
@@ -98,7 +128,7 @@ public class DriverMode extends LinearOpMode {
         }
     }
 
-    class ClawThread extends Thread {
+    class LimitSwitchThread extends Thread {
         public void run(){
             try {
                 while (!isStopRequested()){

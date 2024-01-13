@@ -31,8 +31,6 @@ public class Test extends LinearOpMode{
     public void runOpMode() throws InterruptedException {
         Robot.init(hardwareMap);
         waitForStart();
-        Robot.Claw.setLeftGrip(false);
-        Robot.Claw.setRightGrip(false);
 
         Pose2d startPose = new Pose2d(0, 0, startHeading);
 

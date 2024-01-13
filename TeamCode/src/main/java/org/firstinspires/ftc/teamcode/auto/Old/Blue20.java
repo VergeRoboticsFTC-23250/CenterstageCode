@@ -1,15 +1,15 @@
-package org.firstinspires.ftc.teamcode.auto;
+package org.firstinspires.ftc.teamcode.auto.Old;
 
-import static org.firstinspires.ftc.teamcode.auto.Pipelines.CenterstageRecognitionBlue.CenterstagePosition.LEFT;
-import static org.firstinspires.ftc.teamcode.auto.Pipelines.CenterstageRecognitionBlue.CenterstagePosition.RIGHT;
-import static org.firstinspires.ftc.teamcode.auto.Pipelines.CenterstageRecognitionBlue.CenterstagePosition.UNKNOWN;
+import static org.firstinspires.ftc.teamcode.auto.Pipelines.Old.CenterstageRecognitionBlue.CenterstagePosition.LEFT;
+import static org.firstinspires.ftc.teamcode.auto.Pipelines.Old.CenterstageRecognitionBlue.CenterstagePosition.RIGHT;
+import static org.firstinspires.ftc.teamcode.auto.Pipelines.Old.CenterstageRecognitionBlue.CenterstagePosition.UNKNOWN;
 import static org.firstinspires.ftc.teamcode.util.Robot.Chassis.drive;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.auto.Pipelines.CenterstageRecognitionBlue;
+import org.firstinspires.ftc.teamcode.auto.Pipelines.Old.CenterstageRecognitionBlue;
 import org.firstinspires.ftc.teamcode.util.Robot;
 import org.firstinspires.ftc.teamcode.util.trajectorysequence.TrajectorySequence;
 

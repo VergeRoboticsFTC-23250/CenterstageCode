@@ -1,9 +1,6 @@
-package org.firstinspires.ftc.teamcode.auto.Pipelines;
+package org.firstinspires.ftc.teamcode.auto.Pipelines.Old;
 
-import static org.firstinspires.ftc.teamcode.auto.Pipelines.CenterstageRecognitionBlue.CenterstagePosition.CENTER;
-import static org.firstinspires.ftc.teamcode.auto.Pipelines.CenterstageRecognitionBlue.CenterstagePosition.LEFT;
-import static org.firstinspires.ftc.teamcode.auto.Pipelines.CenterstageRecognitionBlue.CenterstagePosition.RIGHT;
-import static org.firstinspires.ftc.teamcode.auto.Pipelines.CenterstageRecognitionBlue.CenterstagePosition.UNKNOWN;
+import static org.firstinspires.ftc.teamcode.auto.Pipelines.Old.CenterstageRecognitionRed.CenterstagePosition.*;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -14,7 +11,8 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-public class CenterstageRecognitionBlue {
+public class CenterstageRecognitionRed {
+    public static boolean isRed = false;
     public enum CenterstagePosition{
         LEFT,
         CENTER,
@@ -26,11 +24,11 @@ public class CenterstageRecognitionBlue {
 
     static OpenCvWebcam leftWebcam;
     static OpenCvWebcam rightWebcam;
-    static LeftWebcamPipelineBlue leftWebcamPipelineBlue;
-    static RightWebcamPipelineBlue rightWebcamPipelineBlue;
+    static LeftWebcamPipelineRed leftWebcamPipelineRed;
+    static RightWebcamPipelineRed rightWebcamPipelineRed;
 
-    static LeftWebcamPipelineBlue.LeftWebcamPosition leftWebcamPosition = LeftWebcamPipelineBlue.LeftWebcamPosition.LEFT;
-    static RightWebcamPipelineBlue.RightWebcamPosition rightWebcamPosition = RightWebcamPipelineBlue.RightWebcamPosition.RIGHT;
+    static LeftWebcamPipelineRed.LeftWebcamPosition leftWebcamPosition = LeftWebcamPipelineRed.LeftWebcamPosition.LEFT;
+    static RightWebcamPipelineRed.RightWebcamPosition rightWebcamPosition = RightWebcamPipelineRed.RightWebcamPosition.RIGHT;
     static double rightWebcamDifferance = 0;
     static double leftWebcamDifferance = 0;
 
@@ -45,18 +43,18 @@ public class CenterstageRecognitionBlue {
         leftWebcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), viewportContainerIds[0]);
         rightWebcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 2"), viewportContainerIds[1]);
 
-        leftWebcamPipelineBlue = new LeftWebcamPipelineBlue();
-        rightWebcamPipelineBlue = new RightWebcamPipelineBlue();
+        leftWebcamPipelineRed = new LeftWebcamPipelineRed();
+        rightWebcamPipelineRed = new RightWebcamPipelineRed();
 
-        leftWebcam.setPipeline(leftWebcamPipelineBlue);
-        rightWebcam.setPipeline(rightWebcamPipelineBlue);
+        leftWebcam.setPipeline(leftWebcamPipelineRed);
+        rightWebcam.setPipeline(rightWebcamPipelineRed);
 
         leftWebcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
             @Override
             public void onOpened()
             {
-                leftWebcam.setPipeline(leftWebcamPipelineBlue);
+                leftWebcam.setPipeline(leftWebcamPipelineRed);
                 leftWebcam.startStreaming(1280,960, OpenCvCameraRotation.UPSIDE_DOWN);
             }
 
@@ -69,7 +67,7 @@ public class CenterstageRecognitionBlue {
             @Override
             public void onOpened()
             {
-                rightWebcam.setPipeline(rightWebcamPipelineBlue);
+                rightWebcam.setPipeline(rightWebcamPipelineRed);
                 rightWebcam.startStreaming(1280,960, OpenCvCameraRotation.UPRIGHT);
             }
 
@@ -79,27 +77,27 @@ public class CenterstageRecognitionBlue {
     }
 
     public static CenterstagePosition getPosition(){
-        rightWebcamPosition = rightWebcamPipelineBlue.getLastResult();
-        leftWebcamPosition = leftWebcamPipelineBlue.getLastResult();
+        rightWebcamPosition = rightWebcamPipelineRed.getLastResult();
+        leftWebcamPosition = leftWebcamPipelineRed.getLastResult();
 
-        rightWebcamDifferance = rightWebcamPipelineBlue.getRightCamDifferance();
-        leftWebcamDifferance = leftWebcamPipelineBlue.getLeftCamDifferance();
+        rightWebcamDifferance = rightWebcamPipelineRed.getRightCamDifferance();
+        leftWebcamDifferance = leftWebcamPipelineRed.getLeftCamDifferance();
 
-        if(rightWebcamPosition == RightWebcamPipelineBlue.RightWebcamPosition.CENTER && leftWebcamPosition == LeftWebcamPipelineBlue.LeftWebcamPosition.CENTER){
+        if(rightWebcamPosition == RightWebcamPipelineRed.RightWebcamPosition.CENTER && leftWebcamPosition == LeftWebcamPipelineRed.LeftWebcamPosition.CENTER){
             centerstagePosition = CENTER;
-        }else if(rightWebcamPosition == RightWebcamPipelineBlue.RightWebcamPosition.RIGHT && rightWebcamDifferance > leftWebcamDifferance){
+        }else if(rightWebcamPosition == RightWebcamPipelineRed.RightWebcamPosition.RIGHT && rightWebcamDifferance > leftWebcamDifferance){
             centerstagePosition = RIGHT;
-        }else if(leftWebcamPosition == LeftWebcamPipelineBlue.LeftWebcamPosition.LEFT && leftWebcamDifferance > rightWebcamDifferance){
+        }else if(leftWebcamPosition == LeftWebcamPipelineRed.LeftWebcamPosition.LEFT && leftWebcamDifferance > rightWebcamDifferance){
             centerstagePosition = LEFT;
         }else{
             centerstagePosition = UNKNOWN;
         }
 
-        telemetry.addData("Right Cam", rightWebcamPipelineBlue.getLastResult());
-        telemetry.addData("Left Cam", leftWebcamPipelineBlue.getLastResult());
+        telemetry.addData("Right Cam", rightWebcamPipelineRed.getLastResult());
+        telemetry.addData("Left Cam", leftWebcamPipelineRed.getLastResult());
 
-        telemetry.addData("Right Cam", rightWebcamPipelineBlue.getRightCamDifferance());
-        telemetry.addData("Left Cam", leftWebcamPipelineBlue.getLeftCamDifferance());
+        telemetry.addData("Right Cam", rightWebcamPipelineRed.getRightCamDifferance());
+        telemetry.addData("Left Cam", leftWebcamPipelineRed.getLeftCamDifferance());
 
         telemetry.addData("Position", centerstagePosition);
 

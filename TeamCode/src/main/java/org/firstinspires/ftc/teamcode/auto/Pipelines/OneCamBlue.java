@@ -6,15 +6,16 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
-import static org.firstinspires.ftc.teamcode.auto.Pipelines.OneCamBlue.PropPosition.*;
+import static org.firstinspires.ftc.teamcode.util.Robot.PropPosition;
+import static org.firstinspires.ftc.teamcode.util.Robot.PropPosition.*;
 
 import com.acmerobotics.dashboard.config.Config;
 
 @Config
 public class OneCamBlue extends OpenCvPipeline {
     public static Scalar targetColor = new Scalar(110, 255, 255);
-    public Scalar rectColor = new Scalar(0, 0, 255);
-    public Scalar recognizedColor = new Scalar(0, 255, 0);
+    public static Scalar wrongColor = new Scalar(255, 0, 255);
+    public static Scalar correctColor = new Scalar(0, 255, 0);
 
     public static int height = 200;
     public static int width = 200;
@@ -33,14 +34,7 @@ public class OneCamBlue extends OpenCvPipeline {
     private Rect leftRect, centerRect, rightRect;
     private Mat leftCrop, centerCrop, rightCrop;
     private Scalar leftAvg, centerAvg, rightAvg;
-
-    private double leftDist, centerDist, rightDist;
-
-    public enum PropPosition{
-        LEFT,
-        CENTER,
-        RIGHT
-    }
+    private int leftDist, centerDist, rightDist;
     private volatile PropPosition position = CENTER;
     public void init(Mat firstFrame){
         leftRect = new Rect(leftRectX, leftRectY, width, height);
@@ -59,6 +53,20 @@ public class OneCamBlue extends OpenCvPipeline {
         rightAvg = Core.mean(rightCrop);
 
         leftDist = calcDistance(leftAvg.val, targetColor.val);
+        centerDist = calcDistance(centerAvg.val, targetColor.val);
+        rightDist = calcDistance(rightAvg.val, targetColor.val);
+
+        int max = Math.max(leftDist, Math.max(centerDist, rightDist));
+
+        position = max == leftDist? LEFT : max == rightDist ? RIGHT : CENTER;
+
+        input.copyTo(output);
+
+        Imgproc.rectangle(output, leftRect, wrongColor, 4);
+        Imgproc.rectangle(output, centerRect, wrongColor, 4);
+        Imgproc.rectangle(output, rightRect, wrongColor, 4);
+
+        Imgproc.rectangle(output, position == LEFT? leftRect : position == RIGHT? rightRect : centerRect, correctColor, 4);
 
         return output;
     }
@@ -67,11 +75,23 @@ public class OneCamBlue extends OpenCvPipeline {
         return position;
     }
 
-    public double calcDistance(double[] avg, double[] target){
+    public int calcDistance(double[] avg, double[] target){
         double H = Math.min(Math.abs(avg[0] - target[0]), 180 - Math.abs(avg[0] - target[0])) / 180;
         double S = Math.abs(avg[1] - target[1]) / 255;
         double V = Math.abs(avg[2] - target[2]) / 255;
 
-        return (H + S + V / 3)*100;
+        return (int)((H + S + V / 3)*1000);
+    }
+
+    private String scalarToString(Scalar scalar){
+        return "H: " + scalar.val[0] + " S: " + scalar.val[1] + " V: " + scalar.val[2];
+    }
+
+    public String getColors(){
+        return "Left: " + scalarToString(leftAvg) + " Center: " + scalarToString(centerAvg) + " Right: " + scalarToString(rightAvg);
+    }
+
+    public String getDistances(){
+        return "Left: " + leftDist + " Center: " + centerDist + " Right: " + rightDist;
     }
 }

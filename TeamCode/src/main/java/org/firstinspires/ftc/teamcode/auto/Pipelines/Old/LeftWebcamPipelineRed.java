@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.auto.Pipelines;
+package org.firstinspires.ftc.teamcode.auto.Pipelines.Old;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -7,7 +7,7 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
 
-public class LeftWebcamPipelineBlue extends OpenCvPipeline {
+public class LeftWebcamPipelineRed extends OpenCvPipeline {
     Mat YCrCb = new Mat();
     Mat output = new Mat();
     Scalar rectColor = new Scalar(0, 0, 255);
@@ -29,8 +29,8 @@ public class LeftWebcamPipelineBlue extends OpenCvPipeline {
     private volatile double leftCamDifferance = 0;
 
     public void init(Mat firstFrame){
-        leftRect = new Rect(0, 0, firstFrame.cols() / 3, firstFrame.rows() / 3 * 2);
-        centerRect = new Rect(firstFrame.cols() / 3, 0, firstFrame.cols() / 3 * 2, firstFrame.rows() / 3);
+        leftRect = new Rect(0, 0, firstFrame.cols() / 3, firstFrame.rows());
+        centerRect = new Rect(firstFrame.cols() / 3, 0, firstFrame.cols() / 3 * 2, firstFrame.rows());
     }
 
     public Mat processFrame(Mat input){
@@ -39,8 +39,8 @@ public class LeftWebcamPipelineBlue extends OpenCvPipeline {
         leftCrop = YCrCb.submat(leftRect);
         rightCrop = YCrCb.submat(centerRect);
 
-        Core.extractChannel(leftCrop, leftCrop, 2);
-        Core.extractChannel(rightCrop, rightCrop, 2);
+        Core.extractChannel(leftCrop, leftCrop, 1);
+        Core.extractChannel(rightCrop, rightCrop, 1);
 
         avgLeft = Core.mean(leftCrop).val[0];
         avgRight = Core.mean(rightCrop).val[0];
