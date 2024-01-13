@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.teamcode.util;
 
-import static org.firstinspires.ftc.teamcode.util.Robot.Outtake.PivotState.*;
-import static org.firstinspires.ftc.teamcode.util.Robot.RobotState.*;
-
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -12,28 +9,71 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.checkerframework.checker.units.qual.C;
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
-
-import java.io.Serializable;
+import org.firstinspires.ftc.teamcode.util.drive.SampleMecanumDrive;
 
 @Config
 public class Robot {
-    public static double SLOW_AMOUNT = 0.3;
-    public static enum RobotState{
+    public static double SLOW_SPEED = 0.3;
+    public static int SLEEP_TIME_SHORT = 300;
+    public static int SLEEP_TIME_LONG = 700;
+
+    public enum RobotState{
         INTAKE,
-        SCORING,
+        REST,
+        OUTTAKE
     }
 
-    public static RobotState robotState = INTAKE;
+    public static RobotState robotState = RobotState.INTAKE;
+
     public static void init(HardwareMap hardwareMap){
         Chassis.init(hardwareMap);
         Slides.init(hardwareMap);
         Hook.init(hardwareMap);
-        Intake.init(hardwareMap);
-        Outtake.init(hardwareMap);
-        BreakBeam.init(hardwareMap);
         Airplane.init(hardwareMap);
-        AutoPeg.init(hardwareMap);
+        Arm.init(hardwareMap);
+        Claw.init(hardwareMap);
+        Nicker.init(hardwareMap);
+        LimitSwitch.init(hardwareMap);
+    }
+
+    public static void RestToIntake() throws InterruptedException {
+        Claw.setBothGrips(false);
+        Arm.setIntake();
+        Claw.setIntake();
+        Thread.sleep(SLEEP_TIME_SHORT);
+
+        robotState = RobotState.INTAKE;
+    }
+
+    public static void IntakeToRest() throws InterruptedException {
+        Claw.setBothGrips(false);
+        Claw.setRest();
+        Arm.setRest();
+        Thread.sleep(SLEEP_TIME_SHORT);
+
+        robotState = RobotState.REST;
+    }
+
+    public static void RestToOuttake() throws InterruptedException {
+        Claw.setBothGrips(false);
+        Arm.setOuttake();
+        Thread.sleep(SLEEP_TIME_SHORT);
+        Claw.setOuttake();
+        Thread.sleep(SLEEP_TIME_SHORT);
+
+        robotState = RobotState.OUTTAKE;
+    }
+
+    public static void OuttakeToRest() throws InterruptedException {
+        Claw.setBothGrips(false);
+        Claw.setSafe();
+        Thread.sleep(SLEEP_TIME_SHORT);
+        Arm.setRest();
+        Thread.sleep(SLEEP_TIME_LONG);
+        Claw.setRest();
+        Thread.sleep(SLEEP_TIME_SHORT);
+
+        robotState = RobotState.REST;
     }
 
     public static class Chassis{
@@ -59,14 +99,13 @@ public class Robot {
         public static DcMotor leftSlideMotor;
         public static DcMotor rightSlideMotor;
 
-        public static int MAX = 2750;
-        public static int MIN = 0;
-
+        public static int MAX = 2300;
+        public static int MIN = 100;
         public static void init(HardwareMap hardwareMap){
             leftSlideMotor = hardwareMap.get(DcMotor.class, "leftSlide");
             rightSlideMotor = hardwareMap.get(DcMotor.class, "rightSlide");
 
-            rightSlideMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+            leftSlideMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
             leftSlideMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             rightSlideMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -131,22 +170,141 @@ public class Robot {
         public static String getTargetPositions(){
             return "Left Side: " + leftSlideMotor.getTargetPosition() + " Right Side: " + rightSlideMotor.getTargetPosition();
         }
+    }
 
-        public static void home(double pow){
-            run(0, pow);
-            try {
-                Thread.sleep(500);
-            }catch (Exception e){
+    @Config
+    public static class Arm{
+        public static Servo rightPivot;
+        public static Servo leftPivot;
 
-            }
-            leftSlideMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            rightSlideMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        public static double restPos = 0.33;
+        public static double outtakePos = 0.872;
+        public static double intakePos = 0.27;
+        public static double offset = -0.05;
+
+        public static boolean isResting = false;
+
+        public static void init(HardwareMap hardwareMap){
+            rightPivot = hardwareMap.get(Servo.class, "rightArm");
+            leftPivot = hardwareMap.get(Servo.class, "leftArm");
+
+            leftPivot.setDirection(Servo.Direction.REVERSE);
+
+            setIntake();
+        }
+
+        public static void setIntake(){
+            rightPivot.setPosition(intakePos + offset);
+            leftPivot.setPosition(intakePos);
+        }
+
+        public static void setRest(){
+            rightPivot.setPosition(restPos + offset);
+            leftPivot.setPosition(restPos);
+            isResting = true;
+        }
+
+        public static void setOuttake(){
+            rightPivot.setPosition(outtakePos + offset);
+            leftPivot.setPosition(outtakePos);
+            isResting = false;
+        }
+    }
+
+    @Config
+    public static class Claw{
+        public static Servo pivot;
+        public static Servo rightGrip;
+        public static Servo leftGrip;
+
+        public static double openPos = 0.375;
+        public static double closePos = 0.45;
+
+        public static double intakePos = 0.05;
+        public static double restPos = 0.65;
+        public static double outtakePos = 0.4;
+        public static double safePos = 0.5;
+
+        public static void init(HardwareMap hardwareMap){
+            pivot = hardwareMap.get(Servo.class, "clawPivot");
+            pivot.setDirection(Servo.Direction.REVERSE);
+
+            rightGrip = hardwareMap.get(Servo.class, "rightGrip");
+            leftGrip = hardwareMap.get(Servo.class, "leftGrip");
+
+            leftGrip.setDirection(Servo.Direction.REVERSE);
+
+            setIntake();
+            setBothGrips(false);
+        }
+
+        public static void setLeftGrip(boolean state){
+            leftGrip.setPosition(state? openPos : closePos);
+        }
+
+        public static void setRightGrip(boolean state){
+            rightGrip.setPosition(state? openPos : closePos);
+        }
+
+        public static void setBothGrips(boolean state){
+            setLeftGrip(state);
+            setRightGrip(state);
+        }
+
+        public static void setIntake(){
+            pivot.setPosition(intakePos);
+        }
+
+        public static void setRest(){
+            pivot.setPosition(restPos);
+        }
+
+        public static void setOuttake(){
+            pivot.setPosition(outtakePos);
+        }
+
+        public static void setSafe(){
+            pivot.setPosition(safePos);
+        }
+    }
+
+    @Config
+    public static class Nicker{
+        public static Servo rightNicker;
+        public static Servo leftNicker;
+
+        public static double home = 0;
+        public static double out = 1;
+        public static double rest = 0.5;
+
+        public static void init(HardwareMap hardwareMap){
+            rightNicker = hardwareMap.get(Servo.class, "rightNicker");
+            leftNicker = hardwareMap.get(Servo.class, "leftNicker");
+
+            leftNicker.setDirection(Servo.Direction.REVERSE);
+
+            //setHome();
+        }
+
+        public static void setHome(){
+            rightNicker.setPosition(home);
+            leftNicker.setPosition(home);
+        }
+
+        public static void setOut(){
+            rightNicker.setPosition(out);
+            leftNicker.setPosition(out);
+        }
+
+        public static void setRest(){
+            rightNicker.setPosition(rest);
+            leftNicker.setPosition(rest);
         }
     }
 
     @Config
     public static class Hook{
-        public static int maxPos = 5500;
+        public static int extendPos = 5500;
         private static DcMotor hookMotor;
 
         private static boolean isExtended = false;
@@ -155,12 +313,13 @@ public class Robot {
             hookMotor = hardwareMap.get(DcMotor.class, "hook");
             hookMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             hookMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            hookMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         }
 
         public static void toggle(int pow){
             hookMotor.setPower(0);
             isExtended = !isExtended;
-            hookMotor.setTargetPosition(isExtended? maxPos : 1000);
+            hookMotor.setTargetPosition(isExtended? extendPos : 1000);
             hookMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             hookMotor.setPower(pow);
             while (hookMotor.isBusy()){}
@@ -168,120 +327,10 @@ public class Robot {
     }
 
     @Config
-    public static class Intake{
-        private static DcMotor motor;
-        public static Servo pivot;
-
-        private static boolean isActive = false;
-        public static double speed = 0.8;
-        public static double upPosition = 0.5;
-        public static double downPosition = 0.8;
-
-        public static void init(HardwareMap hardwareMap){
-            motor = hardwareMap.get(DcMotor.class, "intake");
-            pivot = hardwareMap.get(Servo.class, "intakePivot");
-            pivot.setPosition(upPosition);
-        }
-
-        public static void toggle(){
-            isActive = !isActive;
-            motor.setPower(isActive? speed : 0);
-            pivot.setPosition(isActive? downPosition : upPosition);
-        }
-
-        public static void setIsActive(boolean isA, double spd){
-            isActive = isA;
-            motor.setPower(isActive? spd : 0);
-            pivot.setPosition(isActive? downPosition : upPosition);
-        }
-    }
-
-    @Config
-    public static class Outtake{
-        private static Servo pivot;
-        private static Servo grip;
-        private static Servo blocker;
-
-        public static double PIVOT_UP = 1;
-        public static double PIVOT_REST = 0.5;
-        public static double PIVOT_DOWN = 0;
-        public static double GRIP_CLOSE = 0.6;
-        public static double BLOCK_BLOCK = 0;
-        public static double BLOCK_OPEN = 0.8;
-
-        public enum PivotState {
-            UP,
-            REST,
-            DOWN
-        }
-
-        private static PivotState pivotState = DOWN;
-
-        public static void init(HardwareMap hardwareMap){
-            pivot = hardwareMap.get(Servo.class, "outtakePivot");
-            Outtake.setPivotState(DOWN);
-
-            grip = hardwareMap.get(Servo.class, "outtakeGrip");
-            grip.setPosition(GRIP_CLOSE);
-
-            blocker = hardwareMap.get(Servo.class, "blocker");
-            blocker.setPosition(BLOCK_BLOCK);
-        }
-
-        public static void openBlocker(){
-            blocker.setPosition(BLOCK_OPEN);
-        }
-
-        public static void closeBlocker(){
-            blocker.setPosition(BLOCK_BLOCK);
-        }
-
-        public static PivotState getPivotState(){
-            return pivotState;
-        }
-
-        public static void openGrip(){
-            grip.setPosition(GRIP_CLOSE + 0.15);
-        }
-
-        public static void closeGrip(){
-            grip.setPosition(GRIP_CLOSE);
-        }
-
-        public static double getPos(){
-            return pivot.getPosition();
-        }
-
-        public static void setPivotState(PivotState state){
-            pivotState = state;
-
-            if(pivotState == UP){
-                pivot.setPosition(PIVOT_UP);
-            }else if(pivotState == REST){
-                pivot.setPosition(PIVOT_REST);
-            }else if(pivotState == DOWN){
-                pivot.setPosition(PIVOT_DOWN);
-            }
-        }
-    }
-
-    public static class BreakBeam{
-        static DigitalChannel breakBeam;
-        public static void init(HardwareMap hardwareMap){
-            breakBeam = hardwareMap.get(DigitalChannel.class, "breakBeam");
-            breakBeam.setMode(DigitalChannel.Mode.INPUT);
-        }
-
-        public static boolean isBlocked(){
-            return breakBeam.getState();
-        }
-    }
-
-    @Config
     public static class Airplane{
         public static Servo airplane;
-        public static double HOLD = 0.4;
-        public static double LAUNCH = 0.8;
+        public static double HOLD = 1;
+        public static double LAUNCH = 0.75;
         public static void init(HardwareMap hardwareMap){
             airplane = hardwareMap.get(Servo.class, "airplane");
             airplane.setPosition(HOLD);
@@ -292,26 +341,20 @@ public class Robot {
         }
     }
 
-    @Config
-    public static class AutoPeg{
-        private static Servo autoPeg;
-        public static double RESTING_POS = 0;
-        public static double STARTING_POS = 0.2;
-        public static double SCORING_POS = 0.8;
+    public static class LimitSwitch{
+        public static DigitalChannel rightSwitch;
+        public static DigitalChannel leftSwitch;
         public static void init(HardwareMap hardwareMap){
-            autoPeg = hardwareMap.get(Servo.class, "autoPeg");
+            rightSwitch = hardwareMap.get(DigitalChannel.class, "rightSwitch");
+            leftSwitch = hardwareMap.get(DigitalChannel.class, "leftSwitch");
         }
 
-        public static void setResting() {
-            autoPeg.setPosition(RESTING_POS);
+        public static boolean getRight(){
+            return rightSwitch.getState();
         }
 
-        public static void setStarting() {
-            autoPeg.setPosition(STARTING_POS);
-        }
-
-        public static void setScoring() {
-            autoPeg.setPosition(SCORING_POS);
+        public static boolean getLeft(){
+            return leftSwitch.getState();
         }
     }
 }
