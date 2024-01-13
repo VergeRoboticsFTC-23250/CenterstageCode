@@ -6,67 +6,72 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
+import static org.firstinspires.ftc.teamcode.auto.Pipelines.OneCamBlue.PropPosition.*;
 
+import com.acmerobotics.dashboard.config.Config;
+
+@Config
 public class OneCamBlue extends OpenCvPipeline {
-    Mat YCrCb = new Mat();
-    Mat output = new Mat();
-    Scalar rectColor = new Scalar(0, 0, 255);
-    Scalar recognizedColor = new Scalar(0, 255, 0);
+    public static Scalar targetColor = new Scalar(110, 255, 255);
+    public Scalar rectColor = new Scalar(0, 0, 255);
+    public Scalar recognizedColor = new Scalar(0, 255, 0);
 
-    Rect centerRect, rightRect;
+    public static int height = 200;
+    public static int width = 200;
 
-    Mat centerCrop, rightCrop;
+    public static int leftRectX = 100;
+    public static int leftRectY = 100;
 
-    double avgCenter, avgRight;
+    public static int centerRectX = 400;
+    public static int centerRectY = 400;
 
-    public enum RightWebcamPosition
-    {
-        RIGHT,
+    public static int rightRectX = 700;
+    public static int rightRectY = 700;
+
+    private Mat HSV = new Mat();
+    private Mat output = new Mat();
+    private Rect leftRect, centerRect, rightRect;
+    private Mat leftCrop, centerCrop, rightCrop;
+    private Scalar leftAvg, centerAvg, rightAvg;
+
+    private double leftDist, centerDist, rightDist;
+
+    public enum PropPosition{
+        LEFT,
         CENTER,
+        RIGHT
     }
-
-    private volatile RightWebcamPosition lastResult = RightWebcamPosition.RIGHT;
-    private volatile double leftCamDifferance = 0;
-
+    private volatile PropPosition position = CENTER;
     public void init(Mat firstFrame){
-        centerRect = new Rect(0, 0, firstFrame.cols() / 3 * 2, firstFrame.rows() / 3);
-        rightRect = new Rect(firstFrame.cols() / 3 * 2, 0, firstFrame.cols() / 3, firstFrame.rows() / 3 * 2);
+        leftRect = new Rect(leftRectX, leftRectY, width, height);
+        centerRect = new Rect(centerRectX, centerRectY, width, height);
+        rightRect = new Rect(rightRectX, rightRectY, width, height);
     }
-
     public Mat processFrame(Mat input){
-        Imgproc.cvtColor(input, YCrCb, Imgproc.COLOR_RGB2YCrCb);
+        Imgproc.cvtColor(input, HSV, Imgproc.COLOR_RGB2HSV_FULL);
 
-        centerCrop = YCrCb.submat(centerRect);
-        rightCrop = YCrCb.submat(rightRect);
+        leftCrop = HSV.submat(leftRect);
+        centerCrop = HSV.submat(centerRect);
+        rightCrop = HSV.submat(rightRect);
 
-        Core.extractChannel(centerCrop, centerCrop, 2);
-        Core.extractChannel(rightCrop, rightCrop, 2);
+        leftAvg = Core.mean(leftCrop);
+        centerAvg = Core.mean(centerCrop);
+        rightAvg = Core.mean(rightCrop);
 
-        avgCenter = Core.mean(centerCrop).val[0];
-        avgRight = Core.mean(rightCrop).val[0];
-
-        leftCamDifferance = Math.abs(avgCenter - avgRight);
-
-        input.copyTo(output);
-        Imgproc.rectangle(output, centerRect, rectColor, 2);
-        Imgproc.rectangle(output, rightRect, rectColor, 2);
-
-        if(avgCenter > avgRight){
-            lastResult = RightWebcamPosition.CENTER;
-            Imgproc.rectangle(output, centerRect, recognizedColor, 2);
-        }else{
-            lastResult = RightWebcamPosition.RIGHT;
-            Imgproc.rectangle(output, rightRect, recognizedColor, 2);
-        }
+        leftDist = calcDistance(leftAvg.val, targetColor.val);
 
         return output;
     }
 
-    public RightWebcamPosition getLastResult(){
-        return lastResult;
+    public PropPosition getLastPosition(){
+        return position;
     }
 
-    public double getRightCamDifferance(){
-        return leftCamDifferance;
+    public double calcDistance(double[] avg, double[] target){
+        double H = Math.min(Math.abs(avg[0] - target[0]), 180 - Math.abs(avg[0] - target[0])) / 180;
+        double S = Math.abs(avg[1] - target[1]) / 255;
+        double V = Math.abs(avg[2] - target[2]) / 255;
+
+        return (H + S + V / 3)*100;
     }
 }
