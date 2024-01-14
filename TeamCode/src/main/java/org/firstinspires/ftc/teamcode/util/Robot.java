@@ -44,6 +44,7 @@ public class Robot {
 
     public static void RestToIntake() throws InterruptedException {
         Claw.setBothGrips(false);
+        Nicker.setOut();
         Arm.setIntake();
         Claw.setIntake();
         Thread.sleep(SLEEP_TIME_SHORT);
@@ -53,6 +54,7 @@ public class Robot {
 
     public static void IntakeToRest() throws InterruptedException {
         Claw.setBothGrips(false);
+        Nicker.setHome();
         Claw.setRest();
         Arm.setRest();
         Thread.sleep(SLEEP_TIME_SHORT);
@@ -289,7 +291,7 @@ public class Robot {
 
             leftNicker.setDirection(Servo.Direction.REVERSE);
 
-            //setHome();
+            setHome();
         }
 
         public static void setHome(){
@@ -305,6 +307,30 @@ public class Robot {
         public static void setRest(){
             rightNicker.setPosition(rest);
             leftNicker.setPosition(rest);
+        }
+
+        public static void setRightRest(){
+            rightNicker.setPosition(rest);
+        }
+
+        public static void setLeftRest(){
+            leftNicker.setPosition(rest);
+        }
+
+        public static void setRightHome(){
+            rightNicker.setPosition(home);
+        }
+
+        public static void setLeftHome(){
+            leftNicker.setPosition(home);
+        }
+
+        public static void setRightOut(){
+            rightNicker.setPosition(out);
+        }
+
+        public static void setLeftOut(){
+            leftNicker.setPosition(out);
         }
     }
 

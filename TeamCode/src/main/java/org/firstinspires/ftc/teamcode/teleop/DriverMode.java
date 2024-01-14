@@ -24,32 +24,6 @@ public class DriverMode extends LinearOpMode {
         limitSwitchThread.start();
 
         while (!isStopRequested()) {
-//            if(gamepad2.cross && !gamepad2.square){
-//                if(robotState != RobotState.INTAKE){
-//                    RestToIntake();
-//                }
-//            }else if(gamepad2.square && !gamepad2.cross){
-//                if(robotState != RobotState.OUTTAKE){
-//                    RestToOuttake();
-//                }
-//
-//                if(gamepad2.right_trigger > 0 && gamepad2.left_trigger > 0){
-//                    Slides.run(0);
-//                }else if(gamepad2.right_trigger > 0){
-//                    Slides.run(gamepad2.right_trigger);
-//                }else if(gamepad2.left_trigger > 0){
-//                    Slides.run(-gamepad2.left_trigger);
-//                }else{
-//                    Slides.run(0);
-//                }
-//
-//            }else{
-//                if(robotState == RobotState.INTAKE){
-//                    IntakeToRest();
-//                }else if(robotState == RobotState.OUTTAKE){
-//                    OuttakeToRest();
-//                }
-//            }
 
             if(!gamepad2.cross && robotState != RobotState.INTAKE && gamepad2.square){
                 if(robotState == RobotState.OUTTAKE){
@@ -79,6 +53,21 @@ public class DriverMode extends LinearOpMode {
                 }else{
                     Slides.run(0);
                 }
+            }
+
+            Claw.setRightGrip(gamepad2.right_bumper);
+            Claw.setLeftGrip(gamepad2.left_bumper);
+
+            if(gamepad2.right_trigger > 0){
+                Nicker.setRightRest();
+            }else{
+                Nicker.setRightOut();
+            }
+
+            if(gamepad2.left_trigger > 0){
+                Nicker.setLeftRest();
+            }else{
+                Nicker.setLeftOut();
             }
 
             if(gamepad1.dpad_up && gamepad1.triangle){
@@ -130,24 +119,28 @@ public class DriverMode extends LinearOpMode {
 
     class LimitSwitchThread extends Thread {
         public void run(){
+            long lastTime = System.currentTimeMillis();
+            int lastCount = 0;
             try {
                 while (!isStopRequested()){
-                    Claw.setRightGrip(gamepad2.right_bumper);
-                    Claw.setLeftGrip(gamepad2.left_bumper);
-
+                    long currentTime = System.currentTimeMillis();
                     if(LimitSwitch.getRight() && LimitSwitch.getLeft()){
-                        gamepad2.setLedColor(0, 1, 0, 1000);
-                        gamepad1.setLedColor(0, 1, 0, 1000);
-                        gamepad2.rumble(300);
-                        gamepad1.rumble(300);
-                        Thread.sleep(300);
-                        gamepad1.rumble(300);
-                        gamepad2.rumble(300);
+                        if(currentTime - lastTime > 1000 || lastCount != 2) {
+                            gamepad2.setLedColor(0, 1, 0, 1000);
+                            gamepad1.setLedColor(0, 1, 0, 1000);
+                            gamepad2.rumbleBlips(2);
+                            lastTime = currentTime;
+                        }
+                        lastCount = 2;
                     }else if(LimitSwitch.getLeft() || LimitSwitch.getRight()){
-                        gamepad2.setLedColor(1, 0, 1, 1000);
-                        gamepad1.setLedColor(1, 0, 1, 1000);
-                        gamepad1.rumble(300);
-                        gamepad2.rumble(300);
+                        if(currentTime - lastTime > 1000 || lastCount != 1) {
+                            gamepad2.setLedColor(1, 0, 1, 1000);
+                            gamepad1.setLedColor(1, 0, 1, 1000);
+                            gamepad1.rumbleBlips(1);
+                        }
+                        lastCount = 1;
+                    }else{
+                        lastCount = 0;
                     }
                 }
             }catch (Exception e){
