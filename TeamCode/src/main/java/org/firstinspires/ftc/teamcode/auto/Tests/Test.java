@@ -3,14 +3,18 @@ package org.firstinspires.ftc.teamcode.auto.Tests;
 import static org.firstinspires.ftc.teamcode.util.Robot.Chassis.drive;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.drive.Drive;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.util.Robot;
+import org.firstinspires.ftc.teamcode.util.drive.DriveConstants;
+import org.firstinspires.ftc.teamcode.util.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.util.trajectorysequence.TrajectorySequence;
 
 @Autonomous
@@ -21,11 +25,17 @@ public class Test extends LinearOpMode{
     public static double y1 = 8;
     public static double a1 = 84;
 
-    public static double x2 = 30;
+    public static double x2 = 29;
     public static double y2 = 36;
 
-    public static double x3 = 36;
-    public static double y3 = 0;
+    public static double x3 = 52;
+    public static double y3 = 30;
+
+    public static double x4 = 48;
+    public static double y4 = -48;
+    public static double x5 = 33;
+    public static double y5 = -62;
+    public static double back1 = 6;
 
     public static boolean b1 = false;
     public void runOpMode() throws InterruptedException {
@@ -34,7 +44,7 @@ public class Test extends LinearOpMode{
 
         Pose2d startPose = new Pose2d(0, 0, startHeading);
 
-        TrajectorySequence trajSeq = drive.trajectorySequenceBuilder(startPose)
+        TrajectorySequence trajSeq1 = drive.trajectorySequenceBuilder(startPose)
                 .setReversed(b1)
                 .lineToLinearHeading(new Pose2d(x1, y1, Math.toRadians(a1)))
                 .addDisplacementMarker(() -> {
@@ -53,13 +63,23 @@ public class Test extends LinearOpMode{
                 .lineToLinearHeading(new Pose2d(x2, y2, Math.toRadians(a1)))
                 .build();
 
-        drive.followTrajectorySequence(trajSeq);
+        drive.followTrajectorySequence(trajSeq1);
 
-        Thread.sleep(500);
         Robot.Claw.setLeftGrip(true);
-        Thread.sleep(500);
+        Thread.sleep(200);
+        Robot.Claw.setLeftGrip(false);
+        Robot.Claw.setRightGrip(false);
         Robot.Arm.setRest();
 
+        TrajectorySequence trajSeq2 = drive.trajectorySequenceBuilder(trajSeq1.end())
+                .lineToConstantHeading(new Vector2d(x3, y3))
+                .lineToConstantHeading(new Vector2d(x4, y4))
+                .lineToConstantHeading(new Vector2d(x5, y5))
+                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(10, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
+                .back(back1)
+                .build();
+
+        drive.followTrajectorySequence(trajSeq2);
 
         Thread.sleep(2000);
     }

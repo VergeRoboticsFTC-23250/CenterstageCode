@@ -13,7 +13,7 @@ import static org.firstinspires.ftc.teamcode.util.Robot.PropPosition;
 
 public class DetectionBlue {
     static OpenCvWebcam webcam;
-    static OneCamBlue pipeline;
+    static YCrCbBlue pipeline;
     static Telemetry telemetry;
 
     public static void init(HardwareMap hardwareMap, Telemetry telemetry){
@@ -21,7 +21,7 @@ public class DetectionBlue {
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        pipeline = new OneCamBlue();
+        pipeline = new YCrCbBlue();
         webcam.setPipeline(pipeline);
 
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
@@ -38,8 +38,7 @@ public class DetectionBlue {
     }
 
     public static PropPosition getPosition(){
-        telemetry.addData("Colors: ", pipeline.getColors());
-        telemetry.addData("Distances: ", pipeline.getDistances());
+        telemetry.addData("Averages: ", pipeline.getAverages());
         return pipeline.getLastPosition();
     }
 }
