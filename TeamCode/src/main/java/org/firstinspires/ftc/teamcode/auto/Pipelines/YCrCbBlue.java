@@ -10,6 +10,9 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import static org.firstinspires.ftc.teamcode.util.Robot.PropPosition.*;
 import static org.firstinspires.ftc.teamcode.util.Robot.PropPosition;
 
+import com.acmerobotics.dashboard.config.Config;
+
+@Config
 public class YCrCbBlue extends OpenCvPipeline {
     Mat YCrCb = new Mat();
     Mat output = new Mat();
@@ -22,24 +25,26 @@ public class YCrCbBlue extends OpenCvPipeline {
 
     double avgLeft, avgRight, avgCenter;
 
-    public static int height = 200;
-    public static int width = 200;
-    public static double centerSizeOffset = 1;
+    public static int heightL = 200;
+    public static int widthL = 200;
+    public static int heightC = 200;
+    public static int widthC = 200;
+    public static int heightR = 200;
+    public static int widthR = 200;
+    public static int leftRectX = 480;
+    public static int leftRectY = 540;
 
-    public static int leftRectX = 100;
-    public static int leftRectY = 100;
+    public static int centerRectX = 960;
+    public static int centerRectY = 540;
 
-    public static int centerRectX = 400;
-    public static int centerRectY = 400;
-
-    public static int rightRectX = 700;
-    public static int rightRectY = 700;
+    public static int rightRectX = 1440;
+    public static int rightRectY = 540;
     private volatile PropPosition position = CENTER;
 
     public void init(Mat firstFrame){
-        leftRect = new Rect(leftRectX, leftRectY, width, height);
-        centerRect = new Rect(centerRectX, centerRectY, (int)(width * centerSizeOffset), (int)(height * centerSizeOffset));
-        rightRect = new Rect(rightRectX, rightRectY, width, height);
+        leftRect = new Rect(leftRectX - (int)(widthL / 2.0), leftRectY - (int)(heightL / 2.0), widthL, heightL);
+        centerRect = new Rect(centerRectX - (int)(widthC / 2.0), centerRectY - (int)(heightC / 2.0), widthC, heightC);
+        rightRect = new Rect(rightRectX - (int)(widthR / 2.0), rightRectY - (int)(heightR / 2.0), widthR, heightR);
     }
 
     public Mat processFrame(Mat input){
@@ -72,7 +77,7 @@ public class YCrCbBlue extends OpenCvPipeline {
             Imgproc.rectangle(output, rightRect, recognizedColor, 4);
         }else{
             position = CENTER;
-            Imgproc.rectangle(output, leftRect, recognizedColor, 4);
+            Imgproc.rectangle(output, centerRect, recognizedColor, 4);
         }
 
         return output;

@@ -13,7 +13,7 @@ import static org.firstinspires.ftc.teamcode.util.Robot.PropPosition;
 
 public class DetectionBlue {
     static OpenCvWebcam webcam;
-    static YCrCbBlue pipeline;
+    public static YCrCbBlue pipeline;
     static Telemetry telemetry;
 
     public static void init(HardwareMap hardwareMap, Telemetry telemetry){
@@ -38,7 +38,6 @@ public class DetectionBlue {
     }
 
     public static PropPosition getPosition(){
-        telemetry.addData("Averages: ", pipeline.getAverages());
         return pipeline.getLastPosition();
     }
 }

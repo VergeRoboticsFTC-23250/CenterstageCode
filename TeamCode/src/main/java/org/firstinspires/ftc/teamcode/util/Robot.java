@@ -2,13 +2,14 @@ package org.firstinspires.ftc.teamcode.util;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.checkerframework.checker.units.qual.C;
 import org.firstinspires.ftc.teamcode.util.drive.SampleMecanumDrive;
 
 @Config
@@ -54,7 +55,7 @@ public class Robot {
 
     public static void IntakeToRest() throws InterruptedException {
         Claw.setBothGrips(false);
-        Nicker.setHome();
+        Nicker.setRest();
         Claw.setRest();
         Arm.setRest();
         Thread.sleep(SLEEP_TIME_SHORT);
@@ -225,10 +226,11 @@ public class Robot {
         public static Servo rightGrip;
         public static Servo leftGrip;
 
-        public static double openPos = 0.375;
+        public static double openRight = 0.375;
+        public static double openLeft = 0.325;
         public static double closePos = 0.45;
 
-        public static double intakePos = 0.05;
+        public static double intakePos = 0.065;
         public static double restPos = 0.65;
         public static double outtakePos = 0.4;
         public static double safePos = 0.5;
@@ -247,11 +249,11 @@ public class Robot {
         }
 
         public static void setLeftGrip(boolean state){
-            leftGrip.setPosition(state? openPos : closePos);
+            leftGrip.setPosition(state? openLeft : closePos);
         }
 
         public static void setRightGrip(boolean state){
-            rightGrip.setPosition(state? openPos : closePos);
+            rightGrip.setPosition(state? openRight : closePos);
         }
 
         public static void setBothGrips(boolean state){
@@ -281,9 +283,10 @@ public class Robot {
         public static Servo rightNicker;
         public static Servo leftNicker;
 
-        public static double home = 0;
+        public static double homeR = 0.4;
+        public static double homeL = 0.425;
         public static double out = 1;
-        public static double rest = 0.5;
+        public static double rest = 0;
 
         public static void init(HardwareMap hardwareMap){
             rightNicker = hardwareMap.get(Servo.class, "rightNicker");
@@ -291,12 +294,12 @@ public class Robot {
 
             leftNicker.setDirection(Servo.Direction.REVERSE);
 
-            setHome();
+            setRest();
         }
 
         public static void setHome(){
-            rightNicker.setPosition(home);
-            leftNicker.setPosition(home);
+            rightNicker.setPosition(homeR);
+            leftNicker.setPosition(homeL);
         }
 
         public static void setOut(){
@@ -318,11 +321,11 @@ public class Robot {
         }
 
         public static void setRightHome(){
-            rightNicker.setPosition(home);
+            rightNicker.setPosition(homeR);
         }
 
         public static void setLeftHome(){
-            leftNicker.setPosition(home);
+            leftNicker.setPosition(homeL);
         }
 
         public static void setRightOut(){
@@ -361,7 +364,7 @@ public class Robot {
     @Config
     public static class Airplane{
         public static Servo airplane;
-        public static double HOLD = 0.75;
+        public static double HOLD = .9;
         public static double LAUNCH = 1;
         public static void init(HardwareMap hardwareMap){
             airplane = hardwareMap.get(Servo.class, "airplane");

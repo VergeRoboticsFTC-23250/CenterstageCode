@@ -58,16 +58,24 @@ public class DriverMode extends LinearOpMode {
             Claw.setRightGrip(gamepad2.right_bumper);
             Claw.setLeftGrip(gamepad2.left_bumper);
 
-            if(gamepad2.right_trigger > 0){
-                Nicker.setRightRest();
+            if(gamepad2.right_trigger > 0 && robotState == RobotState.INTAKE){
+                Nicker.setRightHome();
             }else{
-                Nicker.setRightOut();
+                if(robotState == RobotState.INTAKE){
+                    Nicker.setRightOut();
+                }else{
+                    Nicker.setRightRest();
+                }
             }
 
-            if(gamepad2.left_trigger > 0){
-                Nicker.setLeftRest();
+            if(gamepad2.left_trigger > 0 && robotState == RobotState.INTAKE){
+                Nicker.setLeftHome();
             }else{
-                Nicker.setLeftOut();
+                if(robotState == RobotState.INTAKE){
+                    Nicker.setLeftOut();
+                }else{
+                    Nicker.setLeftRest();
+                }
             }
 
             if(gamepad1.dpad_up && gamepad1.triangle){
@@ -90,6 +98,12 @@ public class DriverMode extends LinearOpMode {
                     }else{
                         Robot.Chassis.run(-gamepad1.right_stick_y, -gamepad1.right_stick_x, -gamepad1.left_stick_x);
                     }
+
+//                    if(gamepad1.right_bumper){
+//                        Robot.Chassis.run(gamepad1.right_stick_y * Robot.SLOW_SPEED, gamepad1.right_stick_x * Robot.SLOW_SPEED, -gamepad1.left_stick_x * Robot.SLOW_SPEED);
+//                    }else{
+//                        Robot.Chassis.run(gamepad1.right_stick_y, gamepad1.right_stick_x, -gamepad1.left_stick_x);
+//                    }
                 }
             }catch (Exception e){
 

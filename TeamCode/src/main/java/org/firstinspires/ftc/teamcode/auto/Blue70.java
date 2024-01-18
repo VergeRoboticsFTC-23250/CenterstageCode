@@ -19,7 +19,9 @@ public class Blue70 extends LinearOpMode {
         Robot.init(hardwareMap);
 
         while (!isStarted() && !isStopRequested()){
-            position = DetectionBlue.getPosition();
+            telemetry.addData("Detected", DetectionBlue.getPosition());
+            telemetry.addData("Averages", DetectionBlue.pipeline.getAverages());
+            telemetry.update();
             sleep(50);
         }
 
