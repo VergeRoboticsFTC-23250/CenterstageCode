@@ -7,6 +7,7 @@ import static org.firstinspires.ftc.teamcode.util.Robot.Chassis.drive;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.auto.Pipelines.Old.CenterstageRecognitionBlue;
@@ -14,6 +15,7 @@ import org.firstinspires.ftc.teamcode.util.Robot;
 import org.firstinspires.ftc.teamcode.util.trajectorysequence.TrajectorySequence;
 
 @Autonomous
+@Disabled
 public class Blue20 extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         CenterstageRecognitionBlue.init(hardwareMap, telemetry);

@@ -21,7 +21,7 @@ public class DriverMode extends LinearOpMode {
 
         driveThread.start();
         telemetryThread.start();
-        limitSwitchThread.start();
+        //limitSwitchThread.start();
 
         while (!isStopRequested()) {
 

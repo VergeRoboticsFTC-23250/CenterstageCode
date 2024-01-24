@@ -47,6 +47,7 @@ public class Robot {
         Claw.setBothGrips(false);
         Nicker.setOut();
         Arm.setIntake();
+        Thread.sleep(SLEEP_TIME_SHORT);
         Claw.setIntake();
         Thread.sleep(SLEEP_TIME_SHORT);
 
@@ -187,7 +188,7 @@ public class Robot {
         public static Servo leftPivot;
 
         public static double restPos = 0.33;
-        public static double outtakePos = 0.872;
+        public static double outtakePos = 0.86;
         public static double intakePos = 0.27;
         public static double offset = -0.05;
 
@@ -226,14 +227,14 @@ public class Robot {
         public static Servo rightGrip;
         public static Servo leftGrip;
 
-        public static double openRight = 0.375;
-        public static double openLeft = 0.325;
-        public static double closePos = 0.45;
+        public static double openRight = 0.35;
+        public static double openLeft = 0.35;
+        public static double closePos = 0.5;
 
-        public static double intakePos = 0.065;
-        public static double restPos = 0.65;
-        public static double outtakePos = 0.4;
-        public static double safePos = 0.5;
+        public static double intakePos = 0.625;
+        public static double restPos = 0.125;
+        public static double outtakePos = 0.325;
+        public static double safePos = 0.325;
 
         public static void init(HardwareMap hardwareMap){
             pivot = hardwareMap.get(Servo.class, "clawPivot");
@@ -364,8 +365,8 @@ public class Robot {
     @Config
     public static class Airplane{
         public static Servo airplane;
-        public static double HOLD = .9;
-        public static double LAUNCH = 1;
+        public static double HOLD = .7;
+        public static double LAUNCH = .5;
         public static void init(HardwareMap hardwareMap){
             airplane = hardwareMap.get(Servo.class, "airplane");
             airplane.setPosition(HOLD);

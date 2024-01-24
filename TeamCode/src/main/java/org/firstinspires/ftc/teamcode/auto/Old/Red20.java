@@ -5,6 +5,7 @@ import static org.firstinspires.ftc.teamcode.util.Robot.Chassis.drive;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.auto.Pipelines.Old.CenterstageRecognitionRed;
@@ -12,6 +13,7 @@ import org.firstinspires.ftc.teamcode.util.Robot;
 import org.firstinspires.ftc.teamcode.util.trajectorysequence.TrajectorySequence;
 
 @Autonomous
+@Disabled
 public class Red20 extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         CenterstageRecognitionRed.init(hardwareMap, telemetry);

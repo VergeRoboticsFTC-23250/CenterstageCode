@@ -13,7 +13,7 @@ import static org.firstinspires.ftc.teamcode.util.Robot.PropPosition;
 import com.acmerobotics.dashboard.config.Config;
 
 @Config
-public class YCrCbBlue extends OpenCvPipeline {
+public class YCrCbRed extends OpenCvPipeline {
     Mat YCrCb = new Mat();
     Mat output = new Mat();
     Scalar rectColor = new Scalar(0, 0, 255);
@@ -54,9 +54,9 @@ public class YCrCbBlue extends OpenCvPipeline {
         centerCrop = YCrCb.submat(centerRect);
         rightCrop = YCrCb.submat(rightRect);
 
-        Core.extractChannel(leftCrop, leftCrop, 2);
-        Core.extractChannel(centerCrop, centerCrop, 2);
-        Core.extractChannel(rightCrop, rightCrop, 2);
+        Core.extractChannel(leftCrop, leftCrop, 1);
+        Core.extractChannel(centerCrop, centerCrop, 1);
+        Core.extractChannel(rightCrop, rightCrop, 1);
 
         avgLeft = Core.mean(leftCrop).val[0];
         avgCenter = Core.mean(centerCrop).val[0];

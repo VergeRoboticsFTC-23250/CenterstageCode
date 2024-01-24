@@ -2,86 +2,71 @@ package org.firstinspires.ftc.teamcode.auto.Tests;
 
 import static org.firstinspires.ftc.teamcode.util.Robot.Chassis.drive;
 
+import android.graphics.Color;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.util.Robot;
-import org.firstinspires.ftc.teamcode.util.drive.DriveConstants;
-import org.firstinspires.ftc.teamcode.util.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.util.trajectorysequence.TrajectorySequence;
 
 @Autonomous
 @Config
 public class Test extends LinearOpMode{
-    public static double startHeading = 0;
-    public static double x1 = 36;
-    public static double y1 = 8;
-    public static double a1 = 85.75;
+    public static double power = 0.2;
+    public static double power2 = 0.1;
+    ColorSensor colorSensor;
+    DistanceSensor distanceSensor;
+    public static double dist = -1;
 
-    public static double x2 = 29;
-    public static double y2 = 34;
+    public static double dist2 = 3;
 
-    public static double x3 = 64;
-    public static double y3 = 30;
-
-    public static double x4 = 48;
-    public static double y4 = -48;
-    public static double x5 = 38;
-    public static double y5 = -60;
-    public static double back1 = 10;
-
-    public static boolean b1 = false;
     public void runOpMode() throws InterruptedException {
         Robot.init(hardwareMap);
+        Robot.Claw.setRest();
+        Robot.Nicker.setOut();
+
+        distanceSensor = hardwareMap.get(DistanceSensor.class, "color");
+        colorSensor = hardwareMap.get(ColorSensor.class, "color");
+        colorSensor.enableLed(false);
+
         waitForStart();
 
-        Pose2d startPose = new Pose2d(0, 0, startHeading);
+        drive.setWeightedDrivePower(new Pose2d(-power, 0, 0));
 
-        TrajectorySequence trajSeq1 = drive.trajectorySequenceBuilder(startPose)
-                .setReversed(b1)
-                .lineToLinearHeading(new Pose2d(x1, y1, Math.toRadians(a1)))
-                .addDisplacementMarker(() -> {
-                    try{
-                        Robot.Claw.setRightGrip(true);
-                        Thread.sleep(200);
-                        Robot.Claw.setRest();
-                        Thread.sleep(200);
-                        //Robot.Arm.setOuttake();
-                        Thread.sleep(200);
-                        Robot.Claw.setOuttake();
-                    }catch (InterruptedException e){
+        Thread.sleep(1000);
 
-                    }
-                })
-                .lineToLinearHeading(new Pose2d(x2, y2, Math.toRadians(a1)))
-                .build();
+        drive.setWeightedDrivePower(new Pose2d());
 
-        drive.followTrajectorySequence(trajSeq1);
+        Pose2d lastPose = drive.getPoseEstimate();
 
-        Robot.Claw.setLeftGrip(true);
-        Thread.sleep(200);
-        Robot.Claw.setLeftGrip(false);
-        Robot.Claw.setRightGrip(false);
-        //Robot.Arm.setRest();
-
-        TrajectorySequence trajSeq2 = drive.trajectorySequenceBuilder(trajSeq1.end())
-                .lineToLinearHeading(new Pose2d(x3, y3, Math.toRadians(a1)))
-                .lineToLinearHeading(new Pose2d(x4, y4, Math.toRadians(a1)))
-                .lineToLinearHeading(new Pose2d(x5, y5, Math.toRadians(a1)))
-                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(10, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .addDisplacementMarker(() -> {
-                    Robot.Claw.setBothGrips(false);
-                    Robot.Nicker.setOut();
-                    Robot.Claw.setIntake();
-                })
-                .back(back1)
+        TrajectorySequence trajSeq2 = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                .lineToSplineHeading(new Pose2d(lastPose.getX() - dist, lastPose.getY(), 0))
                 .build();
 
         drive.followTrajectorySequence(trajSeq2);
-        Robot.Claw.setBothGrips(false);
+
         Thread.sleep(500);
+
+        drive.setWeightedDrivePower(new Pose2d(0, power2, 0));
+
+        double myDist = distanceSensor.getDistance(DistanceUnit.CM);
+
+        while (myDist > dist2){
+            myDist = distanceSensor.getDistance(DistanceUnit.CM);
+            telemetry.addData("dist", myDist);
+            telemetry.update();
+        }
+
+        drive.setWeightedDrivePower(new Pose2d());
+
+
         Robot.Nicker.setHome();
 
         Thread.sleep(2000);
