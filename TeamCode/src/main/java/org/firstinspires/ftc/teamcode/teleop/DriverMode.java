@@ -1,10 +1,13 @@
 package org.firstinspires.ftc.teamcode.teleop;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.util.Robot;
 
 import static org.firstinspires.ftc.teamcode.util.Robot.*;
+import static org.firstinspires.ftc.teamcode.util.Robot.Chassis.drive;
 
 @TeleOp
 public class DriverMode extends LinearOpMode {
@@ -99,11 +102,18 @@ public class DriverMode extends LinearOpMode {
                         Robot.Chassis.run(-gamepad1.right_stick_y, -gamepad1.right_stick_x, -gamepad1.left_stick_x);
                     }
 
-//                    if(gamepad1.right_bumper){
-//                        Robot.Chassis.run(gamepad1.right_stick_y * Robot.SLOW_SPEED, gamepad1.right_stick_x * Robot.SLOW_SPEED, -gamepad1.left_stick_x * Robot.SLOW_SPEED);
-//                    }else{
-//                        Robot.Chassis.run(gamepad1.right_stick_y, gamepad1.right_stick_x, -gamepad1.left_stick_x);
-//                    }
+//                    Pose2d poseEstimate = drive.getPoseEstimate();
+//                    Vector2d input = new Vector2d(
+//                            -gamepad1.left_stick_y,
+//                            -gamepad1.left_stick_x
+//                    ).rotated(-poseEstimate.getHeading());
+//                    drive.setWeightedDrivePower(
+//                            new Pose2d(
+//                                    input.getX(),
+//                                    input.getY(),
+//                                    -gamepad1.right_stick_x
+//                            )
+//                    );
                 }
             }catch (Exception e){
 
