@@ -231,7 +231,7 @@ public class Robot {
         public static double openLeft = 0.35;
         public static double closePos = 0.5;
 
-        public static double intakePos = 0.625;
+        public static double intakePos = 0.65;
         public static double restPos = 0.125;
         public static double outtakePos = 0.325;
         public static double safePos = 0.325;
@@ -284,8 +284,8 @@ public class Robot {
         public static Servo rightNicker;
         public static Servo leftNicker;
 
-        public static double homeR = 0.4;
-        public static double homeL = 0.425;
+        public static double homeR = 0.35;
+        public static double homeL = 0.375;
         public static double out = 1;
         public static double rest = 0;
 
